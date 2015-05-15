@@ -1,0 +1,10 @@
+﻿@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Attribute Value Prefix";
+
+    var attrValue = "Baz";
+}
+
+<span foo="   abc" />
+<span bar="   @attrValue" />
+<span baz="   @attrValue   @attrValue" />
