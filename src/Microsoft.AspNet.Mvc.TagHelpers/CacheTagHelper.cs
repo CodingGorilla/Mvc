@@ -106,10 +106,10 @@ namespace Microsoft.AspNet.Mvc.TagHelpers
         public TimeSpan? ExpiresSliding { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="CachePreservationPriority"/> policy for the cache entry.
+        /// Gets or sets the <see cref="CacheItemPriority"/> policy for the cache entry.
         /// </summary>
         [HtmlAttributeName(CachePriorityAttributeName)]
-        public CachePreservationPriority? Priority { get; set; }
+        public CacheItemPriority? Priority { get; set; }
 
         /// <summary>
         /// Gets or sets the value which determines if the tag helper is enabled or not.
@@ -128,17 +128,12 @@ namespace Microsoft.AspNet.Mvc.TagHelpers
                 {
                     // Create an EntryLink and flow it so that it is accessible via the ambient
                     // EntryLinkHelpers.ContextLink for user code.
-                    var entryLink = new EntryLink();
-                    using (entryLink.FlowContext())
+                    using (var link = MemoryCache.CreateLinkingScope())
                     {
                         result = await context.GetChildContentAsync();
-                    }
 
-                    MemoryCache.Set(key, cacheSetContext =>
-                    {
-                        UpdateCacheContext(cacheSetContext, entryLink);
-                        return result;
-                    });
+                        MemoryCache.Set(key, result, UpdateCacheEntryOptions(new CacheEntryOptions(), link));
+                    }
                 }
             }
 
@@ -197,29 +192,30 @@ namespace Microsoft.AspNet.Mvc.TagHelpers
         }
 
         // Internal for unit testing
-        internal void UpdateCacheContext(ICacheSetContext cacheSetContext, EntryLink entryLink)
+        internal CacheEntryOptions UpdateCacheEntryOptions(CacheEntryOptions cacheEntryOptions, IEntryLink entryLink)
         {
             if (ExpiresOn != null)
             {
-                cacheSetContext.SetAbsoluteExpiration(ExpiresOn.Value);
+                cacheEntryOptions.SetAbsoluteExpiration(ExpiresOn.Value);
             }
 
             if (ExpiresAfter != null)
             {
-                cacheSetContext.SetAbsoluteExpiration(ExpiresAfter.Value);
+                cacheEntryOptions.SetAbsoluteExpiration(ExpiresAfter.Value);
             }
 
             if (ExpiresSliding != null)
             {
-                cacheSetContext.SetSlidingExpiration(ExpiresSliding.Value);
+                cacheEntryOptions.SetSlidingExpiration(ExpiresSliding.Value);
             }
 
             if (Priority != null)
             {
-                cacheSetContext.SetPriority(Priority.Value);
+                cacheEntryOptions.SetPriority(Priority.Value);
             }
 
-            cacheSetContext.AddEntryLink(entryLink);
+            cacheEntryOptions.AddEntryLink(entryLink);
+            return cacheEntryOptions;
         }
 
         private static void AddStringCollectionKey(StringBuilder builder,

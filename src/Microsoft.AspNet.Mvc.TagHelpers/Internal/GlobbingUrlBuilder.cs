@@ -101,16 +101,20 @@ namespace Microsoft.AspNet.Mvc.TagHelpers.Internal
             if (Cache != null)
             {
                 var cacheKey = $"{nameof(GlobbingUrlBuilder)}-inc:{include}-exc:{exclude}";
-                return Cache.GetOrSet(cacheKey, cacheSetContext =>
+                IEnumerable<string> files;
+                if(!Cache.TryGetValue(cacheKey, out files))
                 {
+                    var options = new CacheEntryOptions();
                     foreach (var pattern in includePatterns)
                     {
                         var trigger = FileProvider.Watch(pattern);
-                        cacheSetContext.AddExpirationTrigger(trigger);
+                        options.AddExpirationTrigger(trigger);
                     }
 
-                    return FindFiles(includePatterns, excludePatterns);
-                });
+                    files = FindFiles(includePatterns, excludePatterns);
+
+                    Cache.Set(cacheKey, files, options);
+                }
             }
 
             return FindFiles(includePatterns, excludePatterns);
