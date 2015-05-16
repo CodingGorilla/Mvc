@@ -22,7 +22,7 @@ namespace TagHelperSample.Web.Components
         {
             IExpirationTrigger trigger;
             var movies = _moviesService.GetFeaturedMovies(out trigger);
-            
+
             // Add custom triggers
             EntryLinkHelpers.ContextLink.AddExpirationTriggers(new[] { trigger });
 

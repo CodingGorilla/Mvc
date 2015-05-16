@@ -276,19 +276,12 @@ namespace Microsoft.AspNet.Mvc.TagHelpers.Internal
             var fileProvider = MakeFileProvider(MakeDirectoryContents("site.css", "blank.css"));
             Mock.Get(fileProvider).Setup(f => f.Watch(It.IsAny<string>())).Returns(trigger.Object);
             var cache = MakeCache();
-            var cacheSetContext = new Mock<ICacheSetContext>();
-            cacheSetContext.Setup(c => c.AddExpirationTrigger(trigger.Object)).Verifiable();
+            var cacheSetContext = new CacheEntryOptions();
             Mock.Get(cache).Setup(c => c.Set(
                 /*key*/ It.IsAny<string>(),
-                /*link*/ It.IsAny<IEntryLink>(),
-                /*state*/ It.IsAny<object>(),
-                /*create*/ It.IsAny<Func<ICacheSetContext, object>>()))
-                .Returns<string, IEntryLink, object, Func<ICacheSetContext, object>>(
-                    (key, link, state, create) =>
-                    {
-                        cacheSetContext.Setup(c => c.State).Returns(state);
-                        return create(cacheSetContext.Object);
-                    })
+                /*value*/ It.IsAny<object>(),
+                /*options*/ It.IsAny<CacheEntryOptions>()))
+                .Returns(new object())
                 .Verifiable();
             var requestPathBase = PathString.Empty;
             var globbingUrlBuilder = new GlobbingUrlBuilder(fileProvider, cache, requestPathBase);
@@ -303,7 +296,6 @@ namespace Microsoft.AspNet.Mvc.TagHelpers.Internal
             Assert.Collection(urlList,
                 url => Assert.Equal("/blank.css", url),
                 url => Assert.Equal("/site.css", url));
-            cacheSetContext.VerifyAll();
             Mock.Get(cache).VerifyAll();
         }
 
@@ -450,7 +442,7 @@ namespace Microsoft.AspNet.Mvc.TagHelpers.Internal
         private static IMemoryCache MakeCache(object result = null)
         {
             var cache = new Mock<IMemoryCache>();
-            cache.Setup(c => c.TryGetValue(It.IsAny<string>(), It.IsAny<IEntryLink>(), out result))
+            cache.Setup(c => c.TryGetValue(It.IsAny<string>(), out result))
                 .Returns(result != null);
             return cache.Object;
         }
