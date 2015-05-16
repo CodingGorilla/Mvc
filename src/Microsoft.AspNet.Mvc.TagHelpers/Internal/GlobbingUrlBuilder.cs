@@ -102,7 +102,7 @@ namespace Microsoft.AspNet.Mvc.TagHelpers.Internal
             {
                 var cacheKey = $"{nameof(GlobbingUrlBuilder)}-inc:{include}-exc:{exclude}";
                 IEnumerable<string> files;
-                if(!Cache.TryGetValue(cacheKey, out files))
+                if (!Cache.TryGetValue(cacheKey, out files))
                 {
                     var options = new CacheEntryOptions();
                     foreach (var pattern in includePatterns)
@@ -115,6 +115,7 @@ namespace Microsoft.AspNet.Mvc.TagHelpers.Internal
 
                     Cache.Set(cacheKey, files, options);
                 }
+                return files;
             }
 
             return FindFiles(includePatterns, excludePatterns);
@@ -179,7 +180,7 @@ namespace Microsoft.AspNet.Mvc.TagHelpers.Internal
                     // Only extension differs so just compare the extension
                     var xExt = xExtIndex >= 0 ? x.Substring(xExtIndex) : string.Empty;
                     var yExt = yExtIndex >= 0 ? y.Substring(yExtIndex) : string.Empty;
-                    
+
                     return string.Compare(xExt, yExt, StringComparison.Ordinal);
                 }
 

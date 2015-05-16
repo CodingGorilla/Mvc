@@ -252,18 +252,19 @@ namespace Microsoft.AspNet.Mvc.TagHelpers.Internal
         {
             // Arrange
             var fileProvider = MakeFileProvider();
-            var cache = MakeCache(new List<string> { "/blank.css", "/site.css" });
+            var expected = new List<string> { "/blank.css", "/site.css" };
+            var cache = MakeCache(result: expected);
             var requestPathBase = PathString.Empty;
             var globbingUrlBuilder = new GlobbingUrlBuilder(fileProvider, cache, requestPathBase);
 
             // Act
-            var urlList = globbingUrlBuilder.BuildUrlList(
+            var actual = globbingUrlBuilder.BuildUrlList(
                 staticUrl: null,
                 includePattern: "**/*.css",
                 excludePattern: null);
 
             // Assert
-            Assert.Collection(urlList,
+            Assert.Collection(actual,
                 url => Assert.Equal("/blank.css", url),
                 url => Assert.Equal("/site.css", url));
         }
@@ -386,11 +387,11 @@ namespace Microsoft.AspNet.Mvc.TagHelpers.Internal
             {
                 throw new ArgumentException(nameof(rootNode));
             }
-            
+
             var fileProvider = new Mock<IFileProvider>(MockBehavior.Strict);
             fileProvider.Setup(fp => fp.GetDirectoryContents(string.Empty))
                 .Returns(MakeDirectoryContents(rootNode, fileProvider));
-            
+
             return fileProvider.Object;
         }
 
@@ -410,7 +411,7 @@ namespace Microsoft.AspNet.Mvc.TagHelpers.Internal
                         .Returns(MakeDirectoryContents(node, fileProviderMock));
                 }
             }
-            
+
             var directoryContents = new Mock<IDirectoryContents>();
             directoryContents.Setup(dc => dc.GetEnumerator()).Returns(children.GetEnumerator());
 
