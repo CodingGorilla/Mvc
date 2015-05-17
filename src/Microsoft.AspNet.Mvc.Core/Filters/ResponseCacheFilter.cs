@@ -21,6 +21,16 @@ namespace Microsoft.AspNet.Mvc
         /// <see cref="ResponseCacheFilter"/>.</param>
         public ResponseCacheFilter(CacheProfile cacheProfile)
         {
+            if (!(cacheProfile.NoStore ?? false))
+            {
+                // Duration MUST be set (either in the cache profile or in the attribute) unless NoStore is true.
+                if (cacheProfile.Duration == null)
+                {
+                    throw new InvalidOperationException(
+                            Resources.FormatResponseCache_SpecifyDuration(nameof(NoStore), nameof(Duration)));
+                }
+            }
+
             Duration = cacheProfile.Duration ?? 0;
             Location = cacheProfile.Location ?? ResponseCacheLocation.Any;
             NoStore = cacheProfile.NoStore ?? false;
