@@ -42,6 +42,12 @@ namespace Microsoft.AspNet.Mvc
             Assert.NotNull(rcf);
         }
 
+        [Fact]
+        public void OnActionExecuting_ThrowsIfDurationIsNotSet_WhenNoStoreIsFalse()
+        {
+            
+        }
+
         public static IEnumerable<object[]> CacheControlData
         {
             get
