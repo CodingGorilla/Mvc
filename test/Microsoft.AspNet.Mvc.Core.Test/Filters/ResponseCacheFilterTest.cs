@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation. All rights reserved.
+﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -45,7 +45,19 @@ namespace Microsoft.AspNet.Mvc
         [Fact]
         public void OnActionExecuting_ThrowsIfDurationIsNotSet_WhenNoStoreIsFalse()
         {
-            
+            // Arrange
+            var cache = new ResponseCacheFilter(
+                new CacheProfile
+                {
+                    Duration = null
+                });
+
+            var context = GetActionExecutingContext(new List<IFilter> { cache });
+
+            // Act & Assert
+            var ex = Assert.Throws<InvalidOperationException>(() => cache.OnActionExecuting(context));
+            Assert.Equal("If the 'NoStore' property is not set to true, 'Duration' property must be specified.",
+                ex.Message);
         }
 
         public static IEnumerable<object[]> CacheControlData
