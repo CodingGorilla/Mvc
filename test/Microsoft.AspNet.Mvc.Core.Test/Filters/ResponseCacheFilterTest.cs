@@ -33,12 +33,14 @@ namespace Microsoft.AspNet.Mvc
         [Fact]
         public void ResponseCacheFilter_DoesNotThrowIfDurationIsNotSet_WhenNoStoreIsFalse()
         {
-            // Arrange, Act & Assert
+            // Arrange, Act
 	        var cache = new ResponseCacheFilter(
 		        new CacheProfile
 		        {
 			        Duration = null
 		        });
+
+			// Assert
 	        Assert.NotNull(cache);
         }
 
