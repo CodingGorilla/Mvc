@@ -34,14 +34,32 @@ namespace Microsoft.AspNet.Mvc
         public void ResponseCacheFilter_DoesNotThrowIfDurationIsNotSet_WhenNoStoreIsFalse()
         {
             // Arrange, Act
-	        var cache = new ResponseCacheFilter(
-		        new CacheProfile
-		        {
-			        Duration = null
-		        });
+            var cache = new ResponseCacheFilter(
+                new CacheProfile
+                {
+                    Duration = null
+                });
 
-			// Assert
-	        Assert.NotNull(cache);
+            // Assert
+            Assert.NotNull(cache);
+        }
+
+        [Fact]
+        public void OnActionExecuting_ThrowsIfDurationIsNotSet_WhenNoStoreIsFalse()
+        {
+            // Arrange
+            var cache = new ResponseCacheFilter(
+                new CacheProfile()
+                {
+                    Duration = null
+                });
+
+            var context = GetActionExecutingContext(new List<IFilter> { cache });
+
+            // Act & Assert
+            var ex = Assert.Throws<InvalidOperationException>(() => cache.OnActionExecuting(context));
+            Assert.Equal("If the 'NoStore' property is not set to true, 'Duration' property must be specified.",
+                ex.Message);
         }
 
         public static IEnumerable<object[]> CacheControlData
@@ -127,24 +145,6 @@ namespace Microsoft.AspNet.Mvc
                 };
             }
         }
-
-	    [Theory]
-	    public void OnActionExecuting_ThrowsIfDurationIsNotSet_WhenNoStoreIsFalse()
-	    {
-		    // Arrange
-		    var cache = new ResponseCacheFilter(
-			    new CacheProfile()
-			    {
-				    Duration = null
-			    });
-
-		    var context = GetActionExecutingContext(new List<IFilter> { cache });
-
-			// Act & Assert
-		    var ex = Assert.Throws<InvalidOperationException>(() => cache.OnActionExecuting(context));
-		    Assert.Equal("If the 'NoStore' property is not set to true, 'Duration' property must be specified.",
-			    ex.Message);
-	    }
 
         [Theory]
         [MemberData(nameof(CacheControlData))]
